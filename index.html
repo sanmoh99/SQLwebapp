@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini SQL on TSV</title>
+</head>
+<body>
+  <h1>Mini SQL on TSV</h1>
+
+  <div>
+    <label>TSV Data</label>
+    <textarea id="tsv"></textarea>
+  </div>
+
+  <div>
+    <label>Queries</label>
+    <textarea id="queries"></textarea>
+  </div>
+
+  <div>
+    <button id="load">Load Table</button>
+    <button id="run">Run Queries</button>
+    <button id="clear">Clear Output</button>
+  </div>
+
+  <label>Output</label>
+  <textarea id="out" readonly></textarea>
+
+  <script src="app.js"></script>
+  <script>
+    let setTableFromTsv, runQueries;
+
+    function bindOnce() {
+      setTableFromTsv = Module.cwrap('setTableFromTsv', null, ['string']);
+      runQueries = Module.cwrap('runQueries', 'string', ['string']);
+
+      document.getElementById('load').onclick = () => {
+        const tsv = document.getElementById('tsv').value;
+        setTableFromTsv(tsv);
+        document.getElementById('out').value = 'Table loaded.';
+      };
+
+      document.getElementById('run').onclick = () => {
+        const queries = document.getElementById('queries').value;
+        const result = runQueries(queries) || '';
+        document.getElementById('out').value = result.trim();
+      };
+
+      document.getElementById('clear').onclick = () => {
+        document.getElementById('out').value = '';
+      };
+    }
+
+    if (typeof Module === 'undefined') window.Module = {};
+    Module.onRuntimeInitialized = bindOnce;
+  </script>
+</body>
+</html>
